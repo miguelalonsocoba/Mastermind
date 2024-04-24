@@ -31,3 +31,17 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+
+      - name: Build Docker Image
+        env: 
+          NEW_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          docker build --tag miguetheking/docker-graphql:$NEW_VERSION .
+          docker build --tag miguetheking/docker-graphql:latest .
+
+      - name: Push Docker Image
+        env: 
+          NEW_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          docker push miguetheking/docker-graphql:$NEW_VERSION
+          docker push miguetheking/docker-graphql:latest 
