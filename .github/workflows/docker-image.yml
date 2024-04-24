@@ -36,12 +36,13 @@ jobs:
         env: 
           NEW_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          docker build --tag miguetheking/docker-graphql:$NEW_VERSION .
-          docker build --tag miguetheking/docker-graphql:latest .
+          docker build --tag miguetheking/mastermind:$NEW_VERSION .
+          docker build --tag miguetheking/mastermind:latest .
 
+#Necesita la creación del repositorio de dockerhub para poder subir la imagen.
       - name: Push Docker Image
         env: 
           NEW_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          docker push miguetheking/docker-graphql:$NEW_VERSION
-          docker push miguetheking/docker-graphql:latest 
+          docker push miguetheking/mastermind:$NEW_VERSION
+          docker push miguetheking/:mastermindlatest 
