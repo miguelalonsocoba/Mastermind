@@ -45,4 +45,4 @@ jobs:
           NEW_VERSION: ${{ steps.version.outputs.version }}
         run: |
           docker push miguetheking/mastermind:$NEW_VERSION
-          docker push miguetheking/:mastermindlatest 
+          docker push miguetheking/mastermind:latest 
