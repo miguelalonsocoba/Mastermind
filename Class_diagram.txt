@@ -1,0 +1,119 @@
+@startuml
+class MastermindView {
+  + play()
+}
+class YesNoDialogView {
+  - String answer
+  
+  + read()
+  + isAffirmative()
+  - isNegative()
+}
+class GameView {
+  - Game game
+  
+  + play()
+  - show()
+}
+class ProposalCombinationView {
+  + readProposalConbination()
+  + show()
+}
+class Game {
+  - Array[ProposalCombination] proposalsCombination
+  - SecretCombination secretCombination
+  
+  + void addProposalCombination(ProposalCombination proposalCombination)
+  + Boolean isEndGame()
+  + Boolean isWinne()
+  + Number getAttempts()
+  + Result getResult(Number index)
+  + ProposalCombination getProposalConbination(Number index)
+  - Boolean isCompleteTheBoard() 
+}
+class ProposalCombination {
+  - Combination combination
+  - Boolean error
+  - String errorMessage
+  
+  + Combination getCombination()
+  + Number length()
+  + Boolean contains(String color, Number index)
+  + void setColors(String colors)
+  + Array getColors()
+  + vod validate()
+  + Boolean hasError()
+  + String getErrorMessage()
+  - Boolean hasValidLength()
+  - Boolean hasValidColors()
+  - Boolean hasRepeatedColors()
+}
+class SecretCombination {
+  - Combination combination
+  
+  + Result getResult(ProposalCombination proposalCombination)
+  - Number getBlacks(ProposalCombination proposalCombination)
+  - Number getWhites(ProposalCombination proposalCombination)
+  - void fillWithRandomColors()
+}
+class ResultView {
+  + shoow()
+}
+class Result {
+  - Number blacks
+  - Number whites
+  
+  + Boolean isWinner()
+  + Number getBlacks()
+  + Number getWhites()
+}
+class Combination {
+  - Number COMBINATION_LENTH = 4
+  - String ALLOWED_COLORS = "rgbycm"
+  - Array colors
+  
+  + Number length()
+  + Boolean contains(String color, Number index)
+  + String getColor(Number index)
+  + Array getColors()
+  + Boolean hasValidLength()
+  + Boolean hasValidColors()
+  + Boolean hasRepeatedColors()
+  + void setColors(String otherColors)
+  + void addColor(String color)
+  + String getAllowedColors()
+  + Number getCombinationLength()
+}
+enum Colors {
+  RED
+  BLUE
+  YELLOW
+  GREEN
+  CYAN
+  MAGENTA
+}
+
+MastermindView --> YesNoDialogView
+MastermindView --> GameView
+
+GameView --> ProposalCombinationView
+GameView --> Game
+GameView --> ResultView
+
+ProposalCombinationView --> ProposalCombination
+
+Game o-- "0..10" ProposalCombination
+Game *-- SecretCombination
+Game --> "0..10" Result
+
+ProposalCombination *-- Combination
+
+SecretCombination --> ProposalCombination
+SecretCombination *-- Combination
+SecretCombination --> Result
+
+ResultView --> Result
+
+Combination *-- "1..n" Colors
+
+@enduml
