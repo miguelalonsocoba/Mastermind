@@ -16,8 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
-          show-progress: true
+
       - name: Git Semantic Versión
         uses: paulhatch/semantic-version@v5.3.0
         with:
@@ -25,3 +24,25 @@ jobs:
           minor_pattern: "feature:"
           version_format: "${major}.${minor}.${patch}-prerelease${increment}"
         id: version
+
+      - name: Docker Login
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+
+      - name: Build Docker Image
+        env: 
+          NEW_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          docker build --tag miguetheking/mastermind:$NEW_VERSION .
+          docker build --tag miguetheking/mastermind:latest .
+
+#Necesita la creación del repositorio de dockerhub para poder subir la imagen.
+      - name: Push Docker Image
+        env: 
+          NEW_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          docker push miguetheking/mastermind:$NEW_VERSION
+          docker push miguetheking/mastermind:latest 
