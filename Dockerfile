@@ -1,10 +1,16 @@
-# Imagen base
-FROM node:lts-alpine3.19
-# Se define el directorio de trabajo
+# FIRST STAGE
+FROM node:lts-alpine3.19 as prod-dependencies
 WORKDIR /app
-# Copia el archivo al directorio de trabajo
+COPY package.json ./
+RUN npm install --production
+
+
+# SECOND STAGE
+FROM node:lts-alpine3.19 as runner
+WORKDIR /app
+COPY --from=prod-dependencies /app/node_modules ./node_modules
 COPY app.js ./
-# Comando para ejecutar la aplicación
+COPY package.json ./
 CMD [ "node", "app.js" ]
 
 # Comado para correr la imagen en el contenedor:
