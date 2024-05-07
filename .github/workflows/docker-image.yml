@@ -1,43 +1,51 @@
-name: automatic version control, docker image building and publishing to Dockerhub
+name: Automatic version control. Docker image build and publishing to Dockerhub
 
 on:
-  push:
-    branches:
-      - "main"
   pull_request:
+    types:
+      - closed
     branches:
-      - "main"
+      - main
+
 jobs:
   build:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout code
+      - name: Review code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Git Semantic Versión
-        uses: paulhatch/semantic-version@v5.3.0
-        with:
-          major_pattern: "major:"
-          minor_pattern: "feature:"
-          version_format: "${major}.${minor}.${patch}-prerelease${increment}"
-        id: version
-      - name: Docker Login
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: "0"
+
+      - name: Bump version and push tag
+        id: github_tag
+        uses: anothrNick/github-tag-action@v1
         env:
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_SUPER }}
+          WITH_V: true
+
+      - name: Login to DockerHub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+          docker login --username $DOCKERHUB_USERNAME --password $DOCKERHUB_TOKEN
+          # docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+
       - name: Build Docker Image
         env:
-          NEW_VERSION: ${{ steps.version.outputs.version }}
+          NEW_VERSION: ${{ steps.github_tag.outputs.new_tag  }}
         run: |
           docker build --tag miguetheking/mastermind:$NEW_VERSION .
           docker build --tag miguetheking/mastermind:latest .
+
       #Necesita la creación del repositorio de dockerhub para poder subir la imagen.
-      - name: Push Docker Image
+      - name: Publish imgage to DockerHub
         env:
-          NEW_VERSION: ${{ steps.version.outputs.version }}
+          NEW_VERSION: ${{ steps.github_tag.outputs.new_tag }}
         run: |
           docker push miguetheking/mastermind:$NEW_VERSION
           docker push miguetheking/mastermind:latest
